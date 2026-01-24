@@ -1,10 +1,17 @@
 {
   "name": "three-video-projection",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Projector utility for projecting video textures onto meshes (three.js)",
-  "main": "dist/index.cjs.js",
-  "module": "dist/index.esm.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "files": [
     "dist"
   ],
@@ -31,17 +38,15 @@
     "@types/node": "^25.0.10",
     "@types/three": "^0.182.0",
     "tsup": "^8.5.1",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "@vitejs/plugin-vue": "^6.0.3",
+    "vite": "^7.3.1",
+    "vue": "^3.5.27"
   },
   "dependencies": {
-    "@vitejs/plugin-vue": "^6.0.3",
     "hls.js": "^1.6.15",
-    "path": "^0.12.7",
     "stats.js": "^0.17.0",
-    "three-player-controller": "^0.2.52",
-    "vite": "^7.3.1",
-    "vue": "^3.5.27",
-    "vue-router": "^4.6.4"
+    "three-player-controller": "^0.2.52"
   },
   "repository": {
     "type": "git",
