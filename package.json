@@ -1,6 +1,6 @@
 {
   "name": "three-video-projection",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Projector utility for projecting video textures onto meshes (three.js)",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -8,10 +8,6 @@
   "files": [
     "dist"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/<your-org>/<repo>.git"
-  },
   "keywords": [
     "three",
     "videoProjection",
@@ -46,5 +42,10 @@
     "vite": "^7.3.1",
     "vue": "^3.5.27",
     "vue-router": "^4.6.4"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hh-hang/three-video-projection"
+  },
+  "homepage": "https://hh-hang.github.io/three-video-projection/"
 }

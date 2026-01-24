@@ -18,13 +18,9 @@
 
 # 示例
 
-- [视频融合](https://hh-hang.github.io/three-video-projection/)
+- [![视频融合](https://github.com/hh-hang/three-video-projection/blob/master/example/public/imgs/2.gif)](https://hh-hang.github.io/three-video-projection/)
 
-- [电影院](https://hh-hang.github.io/three-video-projection/cinema.html)
-
-- [视频融合](https://github.com/hh-hang/three-video-projection/blob/master/example/public/imgs/2.gif)
-
-- [电影院](https://github.com/hh-hang/three-video-projection/blob/master/example/public/imgs/1.gif)
+- [![电影院](https://github.com/hh-hang/three-video-projection/blob/master/example/public/imgs/1.gif)](https://hh-hang.github.io/three-video-projection/cinema.html)
 
 ---
 
@@ -139,5 +135,5 @@ projector.dispose();
 
 ---
 
-[npm]: https://img.shields.io/npm/v/
-[npm-url]: https://www.npmjs.com/package/
+[npm]: https://img.shields.io/npm/v/three-video-projection
+[npm-url]: https://www.npmjs.com/package/three-video-projection
