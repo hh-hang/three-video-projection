@@ -5,7 +5,7 @@ import { defineConfig } from "vite";
 export default defineConfig({
   root: ".",
   plugins: [vue()],
-  base: "/three-video-projection/",
+  base: "./",
   build: {
     outDir: "../docs",
     emptyOutDir: true,
