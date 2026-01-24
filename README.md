@@ -16,15 +16,17 @@
 
 ---
 
-# 示例
+## 在线演示
 
-- [视频融合](https://hh-hang.github.io/three-video-projection/)
+点击图片查看在线演示：
 
-- [电影院](https://hh-hang.github.io/three-video-projection/cinema.html)
+### 视频融合
 
-- ![视频融合](https://github.com/hh-hang/three-video-projection/tree/main/example/public/imgs/2.gif)
+[![视频融合](https://raw.githubusercontent.com/hh-hang/three-video-projection/main/example/public/imgs/2.gif "点击查看视频融合示例")](https://hh-hang.github.io/three-video-projection/)
 
-- ![电影院](https://github.com/hh-hang/three-video-projection/tree/main/example/public/imgs/1.gif)
+### 电影院
+
+[![电影院](https://raw.githubusercontent.com/hh-hang/three-video-projection/main/example/public/imgs/1.gif "点击查看电影院示例")](https://hh-hang.github.io/three-video-projection/cinema.html)
 
 ---
 

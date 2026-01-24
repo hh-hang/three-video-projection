@@ -16,15 +16,17 @@ A video projection tool built on **three.js**.
 
 ---
 
-# 示例
+## Live Demo
 
-- [videoFusion](https://hh-hang.github.io/three-video-projection/)
+Click on the images to view the live demos:
 
-- [Cinema](https://hh-hang.github.io/three-video-projection/cinema.html)
+### Video Fusion
 
-- ![videoFusion](https://github.com/hh-hang/three-video-projection/tree/main/example/public/imgs/2.gif)
+[![Video Fusion](https://raw.githubusercontent.com/hh-hang/three-video-projection/main/example/public/imgs/2.gif "Click to view Video Fusion demo")](https://hh-hang.github.io/three-video-projection/)
 
-- ![Cinema](https://github.com/hh-hang/three-video-projection/tree/main/example/public/imgs/1.gif)
+### Cinema
+
+[![Cinema](https://raw.githubusercontent.com/hh-hang/three-video-projection/main/example/public/imgs/1.gif "Click to view Cinema demo")](https://hh-hang.github.io/three-video-projection/cinema.html)
 
 ## Features
 
