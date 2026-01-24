@@ -3,11 +3,11 @@ import { resolve } from "path";
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  root: ".",
   plugins: [vue()],
   base: "/three-video-projection/",
+  root: resolve(__dirname),
   build: {
-    outDir: "../docs",
+    outDir: resolve(__dirname, "../docs"),
     emptyOutDir: true,
     rollupOptions: {
       input: {
