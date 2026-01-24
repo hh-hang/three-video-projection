@@ -1,0 +1,50 @@
+{
+  "name": "three-video-projection",
+  "version": "0.0.1",
+  "description": "Projector utility for projecting video textures onto meshes (three.js)",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/<your-org>/<repo>.git"
+  },
+  "keywords": [
+    "three",
+    "videoProjection",
+    "videoFusion"
+  ],
+  "author": "hh-hang",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "prepare": "npm run build",
+    "build:cinema": "npm --prefix ./examples/cinema install && npm --prefix ./examples/cinema run build",
+    "build:monitor": "npm --prefix ./examples/monitor install && npm --prefix ./examples/monitor run build",
+    "collect": "node ./scripts/collect.js",
+    "build:examples": "npm run build:cinema && npm run build:monitor && npm run collect"
+  },
+  "peerDependencies": {
+    "three": "^0.182.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.10",
+    "@types/three": "^0.182.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@vitejs/plugin-vue": "^6.0.3",
+    "hls.js": "^1.6.15",
+    "path": "^0.12.7",
+    "stats.js": "^0.17.0",
+    "three-player-controller": "^0.2.52",
+    "vite": "^7.3.1",
+    "vue": "^3.5.27",
+    "vue-router": "^4.6.4"
+  }
+}
