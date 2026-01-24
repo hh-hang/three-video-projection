@@ -210,7 +210,7 @@ onMounted(async () => {
 
   // 加载影院屏幕模型
   await gltfLoader
-    .loadAsync("/model/cinemamovie_theater_interior.glb")
+    .loadAsync("model/cinemamovie_theater_interior.glb")
     .then((gltf) => {
       const model = gltf.scene;
       model.position.set(69.41, 0.6, 24.9);
@@ -232,7 +232,7 @@ onMounted(async () => {
     camera,
     controls,
     playerModel: {
-      url: "/model/person.glb",
+      url: "model/person.glb",
       scale: 0.005,
       idleAnim: "idle",
       walkAnim: "walk",

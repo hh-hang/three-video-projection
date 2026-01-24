@@ -3,9 +3,9 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [vue()],
-  base: "/",
+  base: "/three-video-projection/",
   build: {
-    outDir: "../docs", // 输出到仓库根目录的 docs
+    outDir: "../docs",
     emptyOutDir: true,
   },
 });

@@ -86,7 +86,7 @@ onMounted(async () => {
   scene.add(ambient);
 
   video = document.createElement("video");
-  video.src = "/video/monitorTest.mp4";
+  video.src = "video/monitorTest.mp4";
   video.crossOrigin = "anonymous";
   video.muted = true;
   video.loop = true;
@@ -261,7 +261,7 @@ onMounted(async () => {
 
   // 加载模型
   const gltfLoader = new GLTFLoader();
-  gltfLoader.loadAsync("/model/s5_w.trzebnica_11.2017.glb").then((gltf) => {
+  gltfLoader.loadAsync("model/s5_w.trzebnica_11.2017.glb").then((gltf) => {
     const model = gltf.scene;
     model.traverse((child: any) => {
       if (child.isMesh) {
