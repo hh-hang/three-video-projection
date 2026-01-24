@@ -10,7 +10,7 @@
 
 [![NPM Package][npm]][npm-url]
 
-基于 `three.js` 的视频投影工具。
+基于 `three.js` 的视频投影工具。仓库包含示例及源码。
 
 > 该工具将 `THREE.VideoTexture` 从一个投影相机投影到场景中的目标模型上，支持深度遮挡剔除、边缘羽化、强度与透明度控制等。
 
@@ -18,9 +18,13 @@
 
 # 示例
 
-- [![视频融合](https://github.com/hh-hang/three-video-projection/blob/master/example/public/imgs/2.gif)](https://hh-hang.github.io/three-video-projection/)
+- [视频融合](https://hh-hang.github.io/three-video-projection/)
 
-- [![电影院](https://github.com/hh-hang/three-video-projection/blob/master/example/public/imgs/1.gif)](https://hh-hang.github.io/three-video-projection/cinema.html)
+- [电影院](https://hh-hang.github.io/three-video-projection/cinema.html)
+
+- ![视频融合](https://github.com/hh-hang/three-video-projection/blob/master/example/public/imgs/2.gif)
+
+- ![电影院](https://github.com/hh-hang/three-video-projection/blob/master/example/public/imgs/1.gif)
 
 ---
 

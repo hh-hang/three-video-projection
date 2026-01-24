@@ -18,9 +18,13 @@ A video projection tool built on **three.js**.
 
 # 示例
 
-- [![videoFusion](https://github.com/hh-hang/three-video-projection/blob/master/example/public/imgs/2.gif)](https://hh-hang.github.io/three-video-projection/)
+- [videoFusion](https://hh-hang.github.io/three-video-projection/)
 
-- [![Cinema](https://github.com/hh-hang/three-video-projection/blob/master/example/public/imgs/1.gif)](https://hh-hang.github.io/three-video-projection/cinema.html)
+- [Cinema](https://hh-hang.github.io/three-video-projection/cinema.html)
+
+- ![videoFusion](https://github.com/hh-hang/three-video-projection/blob/master/example/public/imgs/2.gif)
+
+- ![Cinema](https://github.com/hh-hang/three-video-projection/blob/master/example/public/imgs/1.gif)
 
 ## Features
 
