@@ -97,7 +97,12 @@ onMounted(async () => {
   video.loop = true;
   video.playsInline = true;
   const videoTexture = new THREE.VideoTexture(video);
-  video.play();
+  try {
+    await video.play();
+    console.log("视频播放成功");
+  } catch (error) {
+    console.warn("视频自动播放失败", error);
+  }
 
   // 投影工具
   projectorTool = await createVideoProjector({

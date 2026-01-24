@@ -184,7 +184,12 @@ onMounted(async () => {
       hls.loadSource("https://test-streams.mux.dev/tos_ismc/main.m3u8");
     });
   }
-  await video.play();
+  try {
+    await video.play();
+    console.log("视频播放成功");
+  } catch (error) {
+    console.warn("视频自动播放失败", error);
+  }
 
   const videoTexture = new VideoTexture(video);
 
