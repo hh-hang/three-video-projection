@@ -1,6 +1,6 @@
 {
   "name": "three-video-projection",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Projector utility for projecting video textures onto meshes (three.js)",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
