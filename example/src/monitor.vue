@@ -31,7 +31,7 @@ import { onBeforeUnmount, onMounted, ref } from "vue";
 import {
   createVideoProjector,
   ProjectorTool,
-} from "../../../src/three-video-projection";
+} from "../../src/three-video-projection";
 
 const cont = ref<HTMLDivElement | null>(null);
 let renderer: THREE.WebGLRenderer;
