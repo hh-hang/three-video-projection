@@ -22,9 +22,9 @@
 
 - [电影院](https://hh-hang.github.io/three-video-projection/cinema.html)
 
-- ![视频融合](https://github.com/hh-hang/three-video-projection/blob/master/example/public/imgs/2.gif)
+- ![视频融合](https://github.com/hh-hang/three-video-projection/tree/main/example/public/imgs/2.gif)
 
-- ![电影院](https://github.com/hh-hang/three-video-projection/blob/master/example/public/imgs/1.gif)
+- ![电影院](https://github.com/hh-hang/three-video-projection/tree/main/example/public/imgs/1.gif)
 
 ---
 
