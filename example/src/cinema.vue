@@ -26,7 +26,12 @@
     </a>
   </div>
 
-  <a class="source" href="" target="_blank" rel="noopener noreferrer">
+  <a
+    class="source"
+    href="https://github.com/hh-hang/three-video-projection/blob/main/example/src/cinema.vue"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
     <img src="/imgs/source.svg" alt="" />
   </a>
 

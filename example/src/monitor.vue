@@ -16,7 +16,12 @@
     <span>注：视频中实际位置与模型位置不一致，仅作参考</span>
   </div>
 
-  <a class="source" href="" target="_blank" rel="noopener noreferrer">
+  <a
+    class="source"
+    href="https://github.com/hh-hang/three-video-projection/blob/main/example/src/monitor.vue"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
     <img src="/imgs/source.svg" alt="" />
   </a>
 </template>
