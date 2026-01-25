@@ -63,7 +63,7 @@ npm install three-video-projection
 
 ```ts
 import * as THREE from "three";
-import { createVideoProjector } from "./path/to/projector";
+import { createVideoProjector } from "three-video-projection";
 
 // Create a video element and a VideoTexture
 const video = document.createElement("video");
