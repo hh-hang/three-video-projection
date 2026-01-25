@@ -364,4 +364,9 @@ canvas {
     width: 24px;
   }
 }
+@media (hover: none) and (pointer: coarse), (max-width: 768px) {
+  .source {
+    display: none !important;
+  }
+}
 </style>

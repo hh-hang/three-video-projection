@@ -28,14 +28,6 @@ Click on the images to view the live demos:
 
 [![Cinema](https://raw.githubusercontent.com/hh-hang/three-video-projection/main/example/public/imgs/1.gif "Click to view Cinema demo")](https://hh-hang.github.io/three-video-projection/cinema.html)
 
-## Features
-
-- Projects a video texture onto specified meshes in the scene.
-- Uses a depth-rendered target for occlusion (prevents the projection from penetrating geometry).
-- Edge feathering for soft projection edges.
-- Adjustable projector camera position and orientation (azimuth / elevation / roll).
-- Video monitoring — tune projector parameters to blend the projection with the video.
-
 ---
 
 ## Installation

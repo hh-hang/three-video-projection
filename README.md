@@ -12,7 +12,7 @@
 
 基于 `three.js` 的视频投影工具。仓库包含示例及源码。
 
-> 该工具将 `THREE.VideoTexture` 从一个投影相机投影到场景中的目标模型上，支持深度遮挡剔除、边缘羽化、强度与透明度控制等。
+该工具将 `THREE.VideoTexture` 从一个投影相机投影到场景中的目标模型上，支持深度遮挡剔除、边缘羽化、强度与透明度控制等。
 
 ---
 
@@ -27,16 +27,6 @@
 ### 电影院
 
 [![电影院](https://raw.githubusercontent.com/hh-hang/three-video-projection/main/example/public/imgs/1.gif "点击查看电影院示例")](https://hh-hang.github.io/three-video-projection/cinema.html)
-
----
-
-## 特性
-
-- 将视频纹理投影到场景中指定的模型（Mesh）。
-- 使用深度渲染目标进行遮挡剔除（保证投影不会穿透）。
-- 边缘羽化以获得柔和的投影边缘。
-- 可调整投影相机位置与姿态（方位角/俯仰/滚转）。
-- 监控视频-设置合适参数能做到与视频融合。
 
 ---
 
