@@ -33,7 +33,6 @@ Click on the images to view the live demos:
 ```bash
 # Clone the repository
 git clone https://github.com/hh-hang/three-video-projection.git
-cd three-video-projection
 
 # Install dependencies
 npm install

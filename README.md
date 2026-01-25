@@ -33,7 +33,6 @@
 ```bash
 # 克隆仓库
 git clone https://github.com/hh-hang/three-video-projection.git
-cd three-video-projection
 
 # 安装依赖
 npm install
