@@ -1,8 +1,6 @@
-⭐ Open source is hard work — give it a star if you like it! ⭐
-
----
-
 [中文](README.md)
+
+⭐ Open source is hard work — give it a star if you like it! ⭐
 
 ---
 
@@ -27,6 +25,30 @@ Click on the images to view the live demos:
 ### Cinema
 
 [![Cinema](https://raw.githubusercontent.com/hh-hang/three-video-projection/main/example/public/imgs/1.gif "Click to view Cinema demo")](https://hh-hang.github.io/three-video-projection/cinema.html)
+
+---
+
+## Run Examples Locally
+
+```bash
+# Clone the repository
+git clone https://github.com/hh-hang/three-video-projection.git
+cd three-video-projection
+
+# Install dependencies
+npm install
+
+# Navigate to the example directory
+cd example
+
+# Install example dependencies
+npm install
+
+# Start the development server
+npm run dev
+```
+
+Then open your browser and visit `http://localhost:5173` to view the examples.
 
 ---
 

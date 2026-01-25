@@ -1,8 +1,6 @@
-⭐ 开源不易，点个Star支持下吧 ⭐
-
----
-
 [英文](README_En.md)
+
+⭐ 开源不易，点个Star支持下吧 ⭐
 
 ---
 
@@ -27,6 +25,30 @@
 ### 电影院
 
 [![电影院](https://raw.githubusercontent.com/hh-hang/three-video-projection/main/example/public/imgs/1.gif "点击查看电影院示例")](https://hh-hang.github.io/three-video-projection/cinema.html)
+
+---
+
+## 本地运行示例
+
+```bash
+# 克隆仓库
+git clone https://github.com/hh-hang/three-video-projection.git
+cd three-video-projection
+
+# 安装依赖
+npm install
+
+# 进入示例目录
+cd example
+
+# 安装示例依赖
+npm install
+
+# 运行开发服务器
+npm run dev
+```
+
+然后在浏览器访问 `http://localhost:5173` 查看示例。
 
 ---
 

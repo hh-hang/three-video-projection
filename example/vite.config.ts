@@ -1,9 +1,19 @@
 import vue from "@vitejs/plugin-vue";
+import { writeFileSync } from "fs";
 import { resolve } from "path";
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [
+    vue(),
+    {
+      name: "create-nojekyll",
+      closeBundle() {
+        const nojekyllPath = resolve(__dirname, "../docs/.nojekyll");
+        writeFileSync(nojekyllPath, "");
+      },
+    },
+  ],
   base: "/three-video-projection/",
   root: resolve(__dirname),
   build: {
