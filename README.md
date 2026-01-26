@@ -1,4 +1,4 @@
-[英文](README_En.md)
+[English](README_En.md)
 
 ⭐ 开源不易，点个Star支持下吧 ⭐
 
