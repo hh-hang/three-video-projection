@@ -92,12 +92,14 @@ const projector = await createVideoProjector({
 });
 
 // Add meshes to be projected onto
-projector.addTargetMesh(myMesh1);
+projector.addTargetMesh(Mesh1);
+projector.addTargetMesh(Mesh2);
+...
 
 // Rendering loop
 function animate() {
   // ... update scene, controls, etc.
-  projector.update();
+  projector.update(); //( If the model position and projection parameters are fixed, there is no need to call the update() function. )
 }
 animate();
 

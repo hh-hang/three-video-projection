@@ -198,6 +198,8 @@ export async function createVideoProjector(
   const targetMeshes: THREE.Mesh[] = [];
   const depthProxies: THREE.Mesh[] = [];
 
+  update();
+
   // 创建投影mesh
   function makeProjectorOverlayAndProxy(mesh: THREE.Mesh) {
     const overlay = new THREE.Mesh(mesh.geometry, projectorMat);

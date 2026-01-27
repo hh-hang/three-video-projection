@@ -92,12 +92,14 @@ const projector = await createVideoProjector({
 });
 
 // 将需要被投影的 mesh 加入
-projector.addTargetMesh(myMesh1);
+projector.addTargetMesh(Mesh1);
+projector.addTargetMesh(Mesh2);
+...
 
 // 渲染循环
 function animate() {
   // ... 更新场景、控制器
-  projector.update();
+  projector.update();//（如果模型位置及投影参数固定时，则不需要执行update()函数）
 }
 animate();
 
