@@ -293,7 +293,7 @@ const start = () => {
   video.muted = false;
   // 创建玩家控制器
   renderer.render(scene, camera);
-  isUpdatePlayer = true; // 更新玩家
+  isUpdatePlayer = true;
   player.init({
     scene,
     camera,
