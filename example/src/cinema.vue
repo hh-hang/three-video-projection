@@ -226,7 +226,7 @@ onMounted(async () => {
   gltfLoader.setDRACOLoader(dracoLoader);
   const ktx2Loader = new KTX2Loader();
   ktx2Loader.setTranscoderPath(
-    "https://unpkg.com/three@0.180.0/examples/jsm/libs/basis/",
+    "https://unpkg.com/three@0.180.0/examples/jsm/libs/basis/", //
   );
   ktx2Loader.detectSupport(renderer);
   gltfLoader.setKTX2Loader(ktx2Loader);
