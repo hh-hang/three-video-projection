@@ -178,7 +178,7 @@ onMounted(async () => {
   scene.add(ambient);
 
   // 背景 hdr
-  new HDRLoader().load("/imgs/1.hdr", (texture) => {
+  new HDRLoader().load("imgs/1.hdr", (texture) => {
     texture.mapping = EquirectangularReflectionMapping;
     scene.background = texture;
   });
