@@ -1,20 +1,19 @@
 <template>
   <div class="container" id="container" ref="cont"></div>
   <div class="model-credit">
-    模型来源：<a
+    影院模型：<a
       href="https://sketchfab.com/3d-models/cinemamovie-theater-interior-dcaf6cdebcad4f03879c24186da257ee"
       target="_blank"
       rel="noopener noreferrer"
     >
       Sketchfab
     </a>
-    <br />
-    视频流地址：<a
-      href="https://test-streams.mux.dev/tos_ismc/main.m3u8"
+    场景模型：<a
+      href="https://sketchfab.com/3d-models/futuristic-city-b4c3c957fad245d580e7a7d1a01c526b"
       target="_blank"
       rel="noopener noreferrer"
     >
-      hls
+      Sketchfab
     </a>
     <br />
     人物控制器：<a
@@ -60,6 +59,10 @@
       <kbd>F</kbd>
     </div>
   </div>
+
+  <div class="play" v-if="isShowPlay">
+    <button class="play-button" @click="start">开始（Start）</button>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -68,6 +71,7 @@ import {
   ACESFilmicToneMapping,
   AmbientLight,
   DirectionalLight,
+  EquirectangularReflectionMapping,
   Object3D,
   PerspectiveCamera,
   Scene,
@@ -80,6 +84,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import Stats from "three/examples/jsm/libs/stats.module.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { HDRLoader } from "three/examples/jsm/loaders/HDRLoader.js";
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader.js";
 import { onBeforeUnmount, onMounted, ref } from "vue";
 import {
@@ -90,6 +95,7 @@ import {
 const cont = ref<HTMLDivElement>();
 const player = playerController();
 let projectorTool: ProjectorTool;
+const isShowPlay = ref(false);
 
 const gltfLoader = new GLTFLoader();
 const scene = new Scene();
@@ -110,7 +116,9 @@ onMounted(async () => {
   containerEl = cont.value!;
 
   // 渲染器
-  renderer = new WebGLRenderer({ antialias: true });
+  renderer = new WebGLRenderer({
+    antialias: true,
+  });
   const initialDPR = Math.min(window.devicePixelRatio || 1, 2);
   renderer.setPixelRatio(initialDPR);
   renderer.setSize(containerEl.clientWidth, containerEl.clientHeight, false);
@@ -133,7 +141,7 @@ onMounted(async () => {
     70,
     containerEl.clientWidth / containerEl.clientHeight,
     0.05,
-    200,
+    1000,
   );
   camera.rotation.order = "YXZ";
   camera.position.copy(pos);
@@ -142,7 +150,6 @@ onMounted(async () => {
   // 控制器
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
-  controls.maxDistance = 2000;
   controls.dampingFactor = 0.1;
   controls.rotateSpeed = 1;
   controls.maxPolarAngle = Math.PI / 2;
@@ -169,6 +176,12 @@ onMounted(async () => {
   // 环境光
   const ambient = new AmbientLight(0xffffff, 3.0);
   scene.add(ambient);
+
+  // 背景 hdr
+  new HDRLoader().load("/imgs/1.hdr", (texture) => {
+    texture.mapping = EquirectangularReflectionMapping;
+    scene.background = texture;
+  });
 
   // 创建视频纹理
   video = document.createElement("video");
@@ -201,7 +214,7 @@ onMounted(async () => {
     projCamPosition: [0.034, 3.5, -7.14],
     projCamParams: { fov: 13.2, aspect: 2.09, near: 0.01, far: 100 },
     orientationParams: { azimuthDeg: 91, elevationDeg: -6, rollDeg: 0 },
-    projBias: 0.001,
+    projBias: 0.0001,
     isShowHelper: false,
   });
 
@@ -220,7 +233,7 @@ onMounted(async () => {
 
   // 加载影院屏幕模型
   await gltfLoader
-    .loadAsync("model/cinemamovie_theater_interior.glb")
+    .loadAsync("/gltf/cinemamovie_theater_interior.glb")
     .then((gltf) => {
       const model = gltf.scene;
       model.position.set(69.41, 0.6, 24.9);
@@ -234,6 +247,50 @@ onMounted(async () => {
       scene.add(model);
     });
 
+  await gltfLoader.loadAsync("/gltf/futuristic_city.glb").then((gltf) => {
+    const model = gltf.scene;
+    model.scale.set(0.005, 0.005, 0.005);
+    model.position.set(-140.9, -8.75, 212.95);
+    model.rotation.y = Math.PI / 2;
+    model.traverse((child: any) => {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+    });
+    scene.add(model);
+  });
+
+  isShowPlay.value = true;
+
+  const videoPosition = new Vector3(-0.13, 2.5, 2.33); // 仅作示例,具体位置需要计算
+  const updateVolume = () => {
+    const distance = player.getposition().distanceTo(videoPosition);
+    video.volume = Math.max(0, 1 - distance / 10);
+  };
+
+  resize();
+  window.addEventListener("resize", resize);
+
+  // 渲染循环
+  renderer.setAnimationLoop(animate);
+  function animate() {
+    if (isUpdatePlayer) {
+      player.update();
+      updateVolume();
+    } else {
+      controls.update();
+    }
+    renderer.render(scene, camera);
+    if (projectorTool) projectorTool.update();
+
+    stats?.update();
+  }
+});
+
+const start = () => {
+  isShowPlay.value = false;
+  video.muted = false;
   // 创建玩家控制器
   renderer.render(scene, camera);
   isUpdatePlayer = true; // 更新玩家
@@ -242,7 +299,7 @@ onMounted(async () => {
     camera,
     controls,
     playerModel: {
-      url: "model/person.glb",
+      url: "/gltf/person16.glb",
       scale: 0.005,
       idleAnim: "idle",
       walkAnim: "walk",
@@ -260,24 +317,7 @@ onMounted(async () => {
     maxCamDistance: 300,
     thirdMouseMode: 1,
   });
-
-  resize();
-  window.addEventListener("resize", resize);
-
-  // 渲染循环
-  renderer.setAnimationLoop(animate);
-  function animate() {
-    if (isUpdatePlayer) {
-      player.update();
-    } else {
-      controls.update();
-    }
-    renderer.render(scene, camera);
-    if (projectorTool) projectorTool.update();
-
-    stats?.update();
-  }
-});
+};
 
 const resize = () => {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -341,7 +381,7 @@ onBeforeUnmount(() => {
 });
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .container {
   width: 100vw;
   height: 100vh;
@@ -452,6 +492,30 @@ kbd {
   .hud,
   .source {
     display: none !important;
+  }
+}
+
+.play {
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  background-color: rgba(0, 0, 0, 0.4);
+
+  .play-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    background-color: #fff;
+    color: #000;
+    padding: 12px 16px;
+    border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    cursor: pointer;
   }
 }
 </style>

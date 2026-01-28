@@ -18,8 +18,8 @@ importers:
         specifier: ^0.182.0
         version: 0.182.0
       three-player-controller:
-        specifier: ^0.2.52
-        version: 0.2.52(three-mesh-bvh@0.9.7(three@0.182.0))(three@0.182.0)
+        specifier: ^0.3.1
+        version: 0.3.1(three-mesh-bvh@0.9.7(three@0.182.0))(three@0.182.0)
     devDependencies:
       '@types/node':
         specifier: ^25.0.10
@@ -636,8 +636,8 @@ packages:
     peerDependencies:
       three: '>= 0.159.0'
 
-  three-player-controller@0.2.52:
-    resolution: {integrity: sha512-w8gfksttm0UiZgXAAygPK5GBt9LIP6sgGwEXo/pxPR4VQbQj/KTULfARX+f8c3Bg1SF+mm1t/syoSEPTf1WiBQ==}
+  three-player-controller@0.3.1:
+    resolution: {integrity: sha512-XfsnWv0SN8csFQQG7TvpMkljMd9buqcGDG9c8L1OlG6IkrUmjzhFPSLr+zSJUrgUCGdhG6vgLvzkzsB5RCKK3g==}
     peerDependencies:
       three: ^0.182.0
       three-mesh-bvh: ^0.9.1
@@ -1212,7 +1212,7 @@ snapshots:
     dependencies:
       three: 0.182.0
 
-  three-player-controller@0.2.52(three-mesh-bvh@0.9.7(three@0.182.0))(three@0.182.0):
+  three-player-controller@0.3.1(three-mesh-bvh@0.9.7(three@0.182.0))(three@0.182.0):
     dependencies:
       3d-tiles-renderer: 0.4.19(three@0.182.0)
       nipplejs: 0.10.2
