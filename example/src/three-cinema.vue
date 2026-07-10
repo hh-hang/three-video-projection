@@ -93,7 +93,7 @@ import {
 } from "../../src/three-video-projection";
 
 const cont = ref<HTMLDivElement>();
-const player = playerController();
+const player = new playerController();
 let ThreeProjectorTool: ThreeProjectorTool;
 const isShowPlay = ref(false);
 
@@ -298,9 +298,9 @@ const start = () => {
         scene,
         camera,
         controls,
-        playerModel: {
+        playerModelConfig: {
             url: "model/person.glb",
-            scale: 0.005,
+            scale: 0.007,
             idleAnim: "idle",
             walkAnim: "walk",
             runAnim: "run",
@@ -314,7 +314,7 @@ const start = () => {
             1.2878521164121084
         ),
         minCamDistance: 50,
-        maxCamDistance: 300,
+        maxCamDistance: 220,
         thirdMouseMode: 1,
     });
 };
