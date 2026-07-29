@@ -1,5 +1,13 @@
 <template>
     <div id="cesium-viewer" ref="viewerDivRef"></div>
+    <CesiumCameraCalibrationPanel
+        v-if="calibrationOpen && video && CesiumProjectorTool && viewer"
+        :video-el="video"
+        :viewer="viewer"
+        :projector="CesiumProjectorTool"
+        @close="calibrationOpen = false"
+        @parameters-change="syncCalibrationGui"
+    />
     <div class="model-credit">
         <span>Note: The video location does not match the model; for reference only.</span>
     </div>
@@ -14,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount } from "vue";
+import { onMounted, onBeforeUnmount, ref } from "vue";
 import * as Cesium from "cesium";
 import { GUI } from "three/examples/jsm/libs/lil-gui.module.min.js";
 import "cesium/Build/CesiumUnminified/Widgets/widgets.css";
@@ -22,9 +30,10 @@ import {
     CesiumProjectorTool,
     createCesiumVideoProjector,
 } from "../../src/cesium-video-projection";
+import CesiumCameraCalibrationPanel from "./cesium-camera-calibration-panel.vue";
 import Hls from "hls.js";
 
-const projectionConfig = {
+const projectionConfig: any = {
     lon: 5.105393631024482,
     lat: 52.09300904272346,
     hei: 48,
@@ -53,11 +62,48 @@ const projectionConfig = {
     quadTRy: 1,
     quadTLx: 0,
     quadTLy: 1,
+    openCalibration: () => {
+        if (!video.value?.videoWidth || !video.value?.videoHeight) {
+            console.warn("视频尚未就绪，暂时无法开始标定");
+            return;
+        }
+        calibrationOpen.value = true;
+    },
+    goToProjector: () => {
+        if (!viewer || !CesiumProjectorTool) return;
+        const [lon, lat, hei] = CesiumProjectorTool.cameraPosition;
+        viewer.camera.setView({
+            destination: Cesium.Cartesian3.fromDegrees(lon, lat, hei),
+            orientation: {
+                heading: Cesium.Math.toRadians(CesiumProjectorTool.azimuthDeg),
+                pitch: Cesium.Math.toRadians(CesiumProjectorTool.elevationDeg),
+                roll: Cesium.Math.toRadians(CesiumProjectorTool.rollDeg),
+            },
+        });
+    },
 };
 
+const calibrationOpen = ref(false);
+const video = ref<HTMLVideoElement | null>(null);
 let viewer: Cesium.Viewer | null = null;
-let CesiumProjectorTool: CesiumProjectorTool;
+let CesiumProjectorTool: CesiumProjectorTool | null = null;
 let gui: GUI | null = null;
+
+const syncCalibrationGui = () => {
+    if (!CesiumProjectorTool || !gui) return;
+    const [lon, lat, hei] = CesiumProjectorTool.cameraPosition;
+    projectionConfig.lon = lon;
+    projectionConfig.lat = lat;
+    projectionConfig.hei = hei;
+    projectionConfig.heading = CesiumProjectorTool.azimuthDeg;
+    projectionConfig.pitch = CesiumProjectorTool.elevationDeg;
+    projectionConfig.roll = CesiumProjectorTool.rollDeg;
+    projectionConfig.fov = CesiumProjectorTool.fov;
+    projectionConfig.aspect = CesiumProjectorTool.aspect;
+    projectionConfig.near = CesiumProjectorTool.near;
+    projectionConfig.far = CesiumProjectorTool.far;
+    gui.controllersRecursive().forEach((controller: any) => controller.updateDisplay());
+};
 
 onMounted(async () => {
     viewer = new Cesium.Viewer("cesium-viewer", {
@@ -74,6 +120,7 @@ onMounted(async () => {
 
     viewer.scene.debugShowFramesPerSecond = true;
     viewer.scene.globe.depthTestAgainstTerrain = true;
+    viewer.scene.pickTranslucentDepth = true;
 
     // 加载3DTILES
     const tileset = await Cesium.Cesium3DTileset.fromUrl(
@@ -98,13 +145,14 @@ onMounted(async () => {
     });
 
     // 创建视频元素
-    const video = document.createElement("video");
-    video.src = "video/monitorTest2.mp4";
-    video.autoplay = true;
-    video.loop = true;
-    video.muted = true;
-    video.crossOrigin = "anonymous";
-    await video.play();
+    const videoEl = document.createElement("video");
+    videoEl.src = "video/monitorTest2.mp4";
+    videoEl.autoplay = true;
+    videoEl.loop = true;
+    videoEl.muted = true;
+    videoEl.crossOrigin = "anonymous";
+    await videoEl.play();
+    video.value = videoEl;
 
     /** 视频流 */
     // 创建视频纹理
@@ -145,7 +193,7 @@ onMounted(async () => {
             elevationDeg: projectionConfig.pitch,
             rollDeg: projectionConfig.roll,
         },
-        source: video,
+        source: videoEl,
         intensity: projectionConfig.intensity,
         projBias: projectionConfig.projBias,
         edgeFeather: projectionConfig.edgeFeather,
@@ -155,13 +203,14 @@ onMounted(async () => {
 
     // 初始化 GUI 控制面板
     gui = new GUI({ title: "Projector Controls" });
- 
+    gui.add(projectionConfig, "openCalibration").name("Open video spatial calibration");
+    gui.add(projectionConfig, "goToProjector").name("Go to projector camera");
 
     let isAutoOpacity = projectionConfig.isAutoOpacity;
 
     // 根据距离设置透明度
     function setOpacityByDistance() {
-        if (!isAutoOpacity || !viewer) return;
+        if (!isAutoOpacity || !viewer || !CesiumProjectorTool) return;
         const camPos = CesiumProjectorTool.cameraPosition;
         const distance = Cesium.Cartesian3.distance(
             viewer.camera.position,

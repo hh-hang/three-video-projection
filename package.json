@@ -25,6 +25,11 @@
       "types": "./dist/cesium.d.ts",
       "import": "./dist/cesium.mjs",
       "require": "./dist/cesium.js"
+    },
+    "./cesium/calibration": {
+      "types": "./dist/cesium-calibration.d.ts",
+      "import": "./dist/cesium-calibration.mjs",
+      "require": "./dist/cesium-calibration.js"
     }
   },
   "files": [
