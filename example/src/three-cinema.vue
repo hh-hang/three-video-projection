@@ -1,14 +1,16 @@
 <template>
     <div class="container" id="container" ref="cont"></div>
     <div class="model-credit">
-        影院模型：<a
+        Cinema model:
+        <a
             href="https://sketchfab.com/3d-models/cinemamovie-theater-interior-dcaf6cdebcad4f03879c24186da257ee"
             target="_blank"
             rel="noopener noreferrer"
         >
             Sketchfab
         </a>
-        场景模型：<a
+        Scene model:
+        <a
             href="https://sketchfab.com/3d-models/futuristic-city-b4c3c957fad245d580e7a7d1a01c526b"
             target="_blank"
             rel="noopener noreferrer"
@@ -16,7 +18,8 @@
             Sketchfab
         </a>
         <br />
-        人物控制器：<a
+        Character controller:
+        <a
             href="https://github.com/hh-hang/three-player-controller"
             target="_blank"
             rel="noopener noreferrer"
@@ -34,34 +37,34 @@
         <img src="/imgs/source.svg" alt="" />
     </a>
 
-    <div class="hud" role="note" aria-label="操作提示">
+    <div class="hud" role="note" aria-label="Controls">
         <div class="row hint-group">
-            <span class="hint-text">控制移动：</span>
+            <span class="hint-text">Move:</span>
             <kbd>W</kbd>
             <kbd>A</kbd>
             <kbd>S</kbd>
             <kbd>D</kbd>
         </div>
         <div class="row hint-group">
-            <span class="hint-text">加速：</span>
+            <span class="hint-text">Sprint:</span>
             <kbd>Shift</kbd>
         </div>
         <div class="row hint-group">
-            <span class="hint-text">跳跃：</span>
+            <span class="hint-text">Jump:</span>
             <kbd>Space</kbd>
         </div>
         <div class="row hint-group">
-            <span class="hint-text">切换视角：</span>
+            <span class="hint-text">Toggle view:</span>
             <kbd>V</kbd>
         </div>
         <div class="row hint-group">
-            <span class="hint-text">切换飞行模式：</span>
+            <span class="hint-text">Toggle fly mode:</span>
             <kbd>F</kbd>
         </div>
     </div>
 
     <div class="play" v-if="isShowPlay">
-        <button class="play-button" @click="start">开始（Start）</button>
+        <button class="play-button" @click="start">Start</button>
     </div>
 </template>
 

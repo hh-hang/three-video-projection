@@ -1,7 +1,7 @@
 <template>
     <div id="cesium-viewer" ref="viewerDivRef"></div>
     <div class="model-credit">
-        <span>注：视频中实际位置与模型位置不一致，仅作参考</span>
+        <span>Note: The video location does not match the model; for reference only.</span>
     </div>
     <a
         class="source"
@@ -154,7 +154,7 @@ onMounted(async () => {
     });
 
     // 初始化 GUI 控制面板
-    gui = new GUI({ title: "投影相机控制" });
+    gui = new GUI({ title: "Projector Controls" });
  
 
     let isAutoOpacity = projectionConfig.isAutoOpacity;
@@ -172,88 +172,88 @@ onMounted(async () => {
     }
     viewer.scene.preRender.addEventListener(setOpacityByDistance);
 
-    const projFolder = gui.addFolder("投影参数");
+    const projFolder = gui.addFolder("Projection");
     projFolder
         .add(projectionConfig, "intensity", 0, 3, 0.01)
-        .name("投影强度(intensity)")
+        .name("Intensity")
         .onChange((v: number) => {
             CesiumProjectorTool.intensity = v;
         });
     projFolder
         .add(projectionConfig, "far", 1, 500, 10)
-        .name("(远裁剪)far")
+        .name("Far")
         .onChange((v: number) => {
             CesiumProjectorTool.far = v;
         });
     projFolder
         .add(projectionConfig, "near", 0.01, 10, 0.1)
-        .name("(近裁剪)near")
+        .name("Near")
         .onChange((v: number) => {
             CesiumProjectorTool.near = v;
         });
     projFolder
         .add(projectionConfig, "fov", 1, 120, 0.1)
-        .name("投影视场角(FOV)")
+        .name("FOV")
         .onChange((v: number) => {
             CesiumProjectorTool.fov = v;
         });
     projFolder
         .add(projectionConfig, "edgeFeather", 0, 0.5, 0.001)
-        .name("边缘羽化(edgeFeather)")
+        .name("Edge feather")
         .onChange((v: number) => {
             CesiumProjectorTool.edgeFeather = v;
         });
     projFolder
         .add(projectionConfig, "aspect", 0.1, 10, 0.01)
-        .name("视频宽高比(aspect)")
+        .name("Aspect")
         .onChange((v: number) => {
             CesiumProjectorTool.aspect = v;
         });
     projFolder
         .add(projectionConfig, "heading", -180, 180, 0.1)
-        .name("方位角(azimuth)")
+        .name("Azimuth")
         .onChange((v: number) => {
             CesiumProjectorTool.azimuthDeg = v;
         });
     projFolder
         .add(projectionConfig, "pitch", -89, 89, 0.1)
-        .name("俯仰角(elevation)")
+        .name("Elevation")
         .onChange((v: number) => {
             CesiumProjectorTool.elevationDeg = v;
         });
     projFolder
         .add(projectionConfig, "roll", -180, 180, 0.1)
-        .name("横滚(roll)")
+        .name("Roll")
         .onChange((v: number) => {
             CesiumProjectorTool.rollDeg = v;
         });
     projFolder
         .add(projectionConfig, "projBias", 0, 0.01, 0.0001)
-        .name("深度偏移(bias)")
+        .name("Depth bias")
         .onChange((v: number) => {
             CesiumProjectorTool.projBias = v;
         });
     projFolder
         .add(projectionConfig, "opacity", 0, 1, 0.01)
-        .name("透明度(opacity)")
+        .name("Opacity")
         .onChange((v: number) => {
             CesiumProjectorTool.opacity = v;
         });
     projFolder
         .add(projectionConfig, "showHelpers")
-        .name("相机辅助器(helpers)")
+        .name("Camera helper")
         .onChange((v: boolean) => {
             CesiumProjectorTool.isShowHelper = v;
         });
     projFolder
         .add(projectionConfig, "isAutoOpacity")
-        .name("自动调节透明度")
+        .name("Auto opacity")
         .onChange((v: boolean) => {
             isAutoOpacity = v;
             if (!isAutoOpacity) CesiumProjectorTool.opacity = 1;
         });
 
-    const posFolder = gui.addFolder("相机坐标(position)");
+    const posFolder = gui.addFolder("Camera position");
     const updatePosition = () => {
         CesiumProjectorTool.cameraPosition = [
             projectionConfig.lon,
@@ -263,15 +263,15 @@ onMounted(async () => {
     };
     posFolder
         .add(projectionConfig, "lon", 5.0987, 5.1187, 0.00001)
-        .name("经度(lon)")
+        .name("Longitude")
         .onChange(updatePosition);
     posFolder
         .add(projectionConfig, "lat", 52.0857, 52.1057, 0.00001)
-        .name("纬度(lat)")
+        .name("Latitude")
         .onChange(updatePosition);
     posFolder
         .add(projectionConfig, "hei", 0, 100, 0.1)
-        .name("高度(hei)")
+        .name("Height")
         .onChange(updatePosition);
         
     // 裁剪区域
@@ -284,22 +284,22 @@ onMounted(async () => {
         ];
     }
 
-    const cropFolder = gui.addFolder("裁剪区域(cropRect)");
+    const cropFolder = gui.addFolder("Crop rect");
     cropFolder
         .add(projectionConfig, "cropX0", 0, 1, 0.01)
-        .name("左边界(x0)")
+        .name("Left (x0)")
         .onChange(updateCropFromGUI);
     cropFolder
         .add(projectionConfig, "cropY0", 0, 1, 0.01)
-        .name("下边界(y0)")
+        .name("Bottom (y0)")
         .onChange(updateCropFromGUI);
     cropFolder
         .add(projectionConfig, "cropX1", 0, 1, 0.01)
-        .name("右边界(x1)")
+        .name("Right (x1)")
         .onChange(updateCropFromGUI);
     cropFolder
         .add(projectionConfig, "cropY1", 0, 1, 0.01)
-        .name("上边界(y1)")
+        .name("Top (y1)")
         .onChange(updateCropFromGUI);
 
     // 四角点变换
@@ -312,38 +312,38 @@ onMounted(async () => {
         ];
     }
 
-    const quadFolder = gui.addFolder("四角点变换(quadCorners)");
+    const quadFolder = gui.addFolder("Quad corners");
     quadFolder
         .add(projectionConfig, "quadBLx", -0.5, 1.5, 0.001)
-        .name("左下X(BL.x)")
+        .name("BL.x")
         .onChange(updateQuadFromGUI);
     quadFolder
         .add(projectionConfig, "quadBLy", -0.5, 1.5, 0.001)
-        .name("左下Y(BL.y)")
+        .name("BL.y")
         .onChange(updateQuadFromGUI);
     quadFolder
         .add(projectionConfig, "quadBRx", -0.5, 1.5, 0.001)
-        .name("右下X(BR.x)")
+        .name("BR.x")
         .onChange(updateQuadFromGUI);
     quadFolder
         .add(projectionConfig, "quadBRy", -0.5, 1.5, 0.001)
-        .name("右下Y(BR.y)")
+        .name("BR.y")
         .onChange(updateQuadFromGUI);
     quadFolder
         .add(projectionConfig, "quadTRx", -0.5, 1.5, 0.001)
-        .name("右上X(TR.x)")
+        .name("TR.x")
         .onChange(updateQuadFromGUI);
     quadFolder
         .add(projectionConfig, "quadTRy", -0.5, 1.5, 0.001)
-        .name("右上Y(TR.y)")
+        .name("TR.y")
         .onChange(updateQuadFromGUI);
     quadFolder
         .add(projectionConfig, "quadTLx", -0.5, 1.5, 0.001)
-        .name("左上X(TL.x)")
+        .name("TL.x")
         .onChange(updateQuadFromGUI);
     quadFolder
         .add(projectionConfig, "quadTLy", -0.5, 1.5, 0.001)
-        .name("左上Y(TL.y)")
+        .name("TL.y")
         .onChange(updateQuadFromGUI);
 });
 

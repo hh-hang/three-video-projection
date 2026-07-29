@@ -16,6 +16,11 @@
       "import": "./dist/three.mjs",
       "require": "./dist/three.js"
     },
+    "./three/calibration": {
+      "types": "./dist/three-calibration.d.ts",
+      "import": "./dist/three-calibration.mjs",
+      "require": "./dist/three-calibration.js"
+    },
     "./cesium": {
       "types": "./dist/cesium.d.ts",
       "import": "./dist/cesium.mjs",

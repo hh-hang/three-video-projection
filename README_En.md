@@ -256,8 +256,6 @@ Notes:
 | `isShowHelper` | `boolean` | No | `true` | Whether to show the frustum helper. |
 | `cropRect` | `[number, number, number, number]` | No | `[0, 0, 1, 1]` | UV crop rectangle. |
 | `quadCorners` | `[[number, number], [number, number], [number, number], [number, number]]` | No | `[[0,0],[1,0],[1,1],[0,1]]` | Keystone correction corners; order: BL, BR, TR, TL. |
-| `videoPlay` | `boolean` | No | - | Reserved field (not used in current core flow). |
-| `texture` | `any` | No | - | Reserved field (not used in current core flow). |
 
 `CesiumProjectorTool` Method Table:
 

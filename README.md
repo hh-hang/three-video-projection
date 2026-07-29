@@ -255,8 +255,6 @@ projector.destroy();
 | `isShowHelper` | `boolean` | 否 | `true` | 是否显示视锥辅助线。 |
 | `cropRect` | `[number, number, number, number]` | 否 | `[0, 0, 1, 1]` | UV 裁剪区域。 |
 | `quadCorners` | `[[number, number], [number, number], [number, number], [number, number]]` | 否 | `[[0,0],[1,0],[1,1],[0,1]]` | 四角透视校正，顺序：左下、右下、右上、左上。 |
-| `videoPlay` | `boolean` | 否 | - | 预留字段（当前核心流程未使用）。 |
-| `texture` | `any` | 否 | - | 预留字段（当前核心流程未使用）。 |
 
 `CesiumProjectorTool` 方法表：
 

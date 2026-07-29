@@ -41,8 +41,6 @@ export interface CesiumProjectorOptions {
     projBias?: number;
     edgeFeather?: number;
     isShowHelper?: boolean;
-    videoPlay?: boolean;
-    texture?: any;
     cropRect?: [number, number, number, number];
     quadCorners?: [
         [number, number],

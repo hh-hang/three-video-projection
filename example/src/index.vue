@@ -18,7 +18,7 @@
         <header class="header">
             <h1 class="title">vid3d-projection</h1>
             <p class="subtitle">
-                Three.js & Cesium.js的三维场景视频纹理投影工具
+                Video texture projection for Three.js and Cesium.js 3D scenes
             </p>
         </header>
         <main class="examples">
@@ -28,8 +28,8 @@
                     <img src="/imgs/2.gif" alt="Monitor" />
                 </div>
                 <div class="card-info">
-                    <h2>监控</h2>
-                    <p>Three 监控视频投影示例</p>
+                    <h2>Monitor</h2>
+                    <p>Three.js surveillance video projection demo</p>
                     <span class="card-arrow">→</span>
                 </div>
             </a>
@@ -39,8 +39,8 @@
                     <img src="/imgs/3.gif" alt="Cesium" />
                 </div>
                 <div class="card-info">
-                    <h2>监控</h2>
-                    <p>Cesium 监控视频投影示例</p>
+                    <h2>Monitor</h2>
+                    <p>Cesium surveillance video projection demo</p>
                     <span class="card-arrow">→</span>
                 </div>
             </a>
@@ -50,8 +50,8 @@
                     <img src="/imgs/1.gif" alt="Cinema" />
                 </div>
                 <div class="card-info">
-                    <h2>影院</h2>
-                    <p>影院场景视频投影示例</p>
+                    <h2>Cinema</h2>
+                    <p>Cinema scene video projection demo</p>
                     <span class="card-arrow">→</span>
                 </div>
             </a>

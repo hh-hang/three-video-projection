@@ -8,8 +8,17 @@
             position: absolute;
         "
     ></div>
+    <ThreeCameraCalibrationPanel
+        v-if="calibrationOpen"
+        :video-el="video"
+        :renderer="renderer"
+        :view-camera="camera"
+        :projector="ThreeProjectorTool"
+        @close="calibrationOpen = false"
+        @parameters-change="syncCalibrationGui"
+    />
     <div class="model-credit">
-        模型来源：
+        Model source:
         <a
             href="https://sketchfab.com/3d-models/s5-wtrzebnica-112017-75914beaf05941e1a24b6bca530dc1a6"
             target="_blank"
@@ -18,7 +27,7 @@
             Sketchfab
         </a>
         <br />
-        <span>注：视频中实际位置与模型位置不一致，仅作参考</span>
+        <span>Note: The video location does not match the model; for reference only.</span>
     </div>
 
     <a
@@ -38,6 +47,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GUI } from "three/examples/jsm/libs/lil-gui.module.min.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { onBeforeUnmount, onMounted, ref } from "vue";
+import ThreeCameraCalibrationPanel from "./three-camera-calibration-panel.vue";
 import {
     createThreeVideoProjector,
     ThreeProjectorTool,
@@ -54,9 +64,26 @@ let projCam: THREE.PerspectiveCamera;
 let camHelper: THREE.CameraHelper | null = null;
 let gui: any = null;
 let video: HTMLVideoElement;
-let isAutoOpacity = true;
+let isAutoOpacity = false;
+let guiConfig: any = null;
+const calibrationOpen = ref(false);
 
-const position: [number, number, number] = [-65.39, 119, 254.18];
+const position: [number, number, number] = [-65.423, 119.9516, 250.5041];
+
+const syncCalibrationGui = () => {
+    if (!guiConfig || !ThreeProjectorTool || !projCam) return;
+    guiConfig.projFov = projCam.fov;
+    guiConfig.proFar = projCam.far;
+    guiConfig.proNear = projCam.near;
+    guiConfig.videoAspect = projCam.aspect;
+    guiConfig.azimuthDeg = ThreeProjectorTool.azimuthDeg;
+    guiConfig.elevationDeg = ThreeProjectorTool.elevationDeg;
+    guiConfig.rollDeg = ThreeProjectorTool.rollDeg;
+    guiConfig.projPosX = projCam.position.x;
+    guiConfig.projPosY = projCam.position.y;
+    guiConfig.projPosZ = projCam.position.z;
+    gui?.controllersRecursive().forEach((controller: any) => controller.updateDisplay());
+};
 
 onMounted(async () => {
     const container = cont.value!;
@@ -114,8 +141,8 @@ onMounted(async () => {
         scene,
         renderer,
         projCamPosition: position,
-        projCamParams: { fov: 36.6, aspect: 1, near: 0.1, far: 400 },
-        orientationParams: { azimuthDeg: 90, elevationDeg: -18.2, rollDeg: 0 },
+        projCamParams: { fov: 33.18234, aspect: 1, near: 0.1, far: 400 },
+        orientationParams: { azimuthDeg: 89.73154, elevationDeg: -16.9054, rollDeg: -2.8378 },
         videoTexture,
         isShowHelper: false,
     });
@@ -135,7 +162,7 @@ onMounted(async () => {
     controls.update();
 
     // 调试
-    gui = new GUI({ title: "投影相机控制" });
+    gui = new GUI({ title: "Projector Controls" });
     const cfg: any = {
         showHelpers: ThreeProjectorTool.camHelper?.visible,
         enableOcclusionCulling: ThreeProjectorTool.enableOcclusionCulling,
@@ -166,31 +193,57 @@ onMounted(async () => {
         quadTRy: 1,
         quadTLx: 0,
         quadTLy: 1,
+        openCalibration: () => {
+            if (!video.videoWidth || !video.videoHeight) {
+                console.warn("视频尚未就绪，暂时无法开始标定");
+                return;
+            }
+            if (!ThreeProjectorTool.targetMeshes.length) {
+                console.warn("模型尚未加载完成，暂时无法开始标定");
+                return;
+            }
+            calibrationOpen.value = true;
+        },
+        goToProjector: () => {
+            camera.position.copy(projCam.position);
+            camera.quaternion.copy(projCam.quaternion);
+            camera.updateMatrixWorld();
+            const dir = new THREE.Vector3();
+            projCam.getWorldDirection(dir);
+            controls.target
+                .copy(projCam.position)
+                .add(dir.multiplyScalar(50));
+            controls.update();
+        },
     };
+    guiConfig = cfg;
+
+    gui.add(cfg, "openCalibration").name("Open video spatial calibration");
+    gui.add(cfg, "goToProjector").name("Go to projector camera");
 
     function updatePositionFromGUI() {
         projCam.position.set(cfg.projPosX, cfg.projPosY, cfg.projPosZ);
         if (camHelper) camHelper.update();
     }
 
-    const projFolder = gui.addFolder("投影参数");
+    const projFolder = gui.addFolder("Projection");
     projFolder
         .add(cfg, "intensity", 0, 3, 0.01)
-        .name("投影强度(intensity)")
+        .name("Intensity")
         .onChange((v: number) => {
             ThreeProjectorTool.uniforms.intensity.value = v;
         });
     projFolder
-        .add(cfg, "proFar", 1, 500, 10)
-        .name("(远裁剪)far")
+        .add(cfg, "proFar", 1, 2000, 10)
+        .name("Far")
         .onChange((v: number) => {
             projCam.far = v;
             projCam.updateProjectionMatrix();
             if (camHelper) camHelper.update();
         });
     projFolder
-        .add(cfg, "proNear", 1, 10, 0.1)
-        .name("(近裁剪)near")
+        .add(cfg, "proNear", 0.01, 10, 0.01)
+        .name("Near")
         .onChange((v: number) => {
             projCam.near = v;
             projCam.updateProjectionMatrix();
@@ -198,7 +251,7 @@ onMounted(async () => {
         });
     projFolder
         .add(cfg, "projFov", 1, 120, 0.1)
-        .name("投影视场角(FOV)")
+        .name("FOV")
         .onChange((v: number) => {
             projCam.fov = v;
             projCam.updateProjectionMatrix();
@@ -206,13 +259,13 @@ onMounted(async () => {
         });
     projFolder
         .add(cfg, "edgeFeather", 0, 0.5, 0.001)
-        .name("边缘羽化(edgeFeather)")
+        .name("Edge feather")
         .onChange((v: number) => {
             ThreeProjectorTool.uniforms.edgeFeather.value = v;
         });
     projFolder
         .add(cfg, "videoAspect", 0.1, 10, 0.01)
-        .name("视频宽高比(aspect)")
+        .name("Aspect")
         .onChange((v: number) => {
             projCam.aspect = v;
             projCam.updateProjectionMatrix();
@@ -220,55 +273,55 @@ onMounted(async () => {
         });
     projFolder
         .add(cfg, "azimuthDeg", -180, 180, 0.1)
-        .name("方位角(azimuth)")
+        .name("Azimuth")
         .onChange((v: number) => {
             ThreeProjectorTool.azimuthDeg = v;
         });
     projFolder
         .add(cfg, "elevationDeg", -89, 89, 0.1)
-        .name("俯仰角(elevation)")
+        .name("Elevation")
         .onChange((v: number) => {
             ThreeProjectorTool.elevationDeg = v;
         });
     projFolder
         .add(cfg, "rollDeg", -180, 180, 0.1)
-        .name("横滚(roll)")
+        .name("Roll")
         .onChange((v: number) => {
             ThreeProjectorTool.rollDeg = v;
         });
     projFolder
         .add(cfg, "projBias", 0.0, 0.001, 0.00001)
-        .name("深度偏移(bias)")
+        .name("Depth bias")
         .onChange((v: number) => {
             ThreeProjectorTool.uniforms.projBias.value = v;
         });
     projFolder
         .add(cfg, "showHelpers")
-        .name("相机辅助器(helpers)")
+        .name("Camera helper")
         .onChange((v: boolean) => {
             if (camHelper) camHelper.visible = v;
         });
     projFolder
         .add(cfg, "enableOcclusionCulling")
-        .name("遮挡剔除(occlusionCulling)")
+        .name("Occlusion culling")
         .onChange((v: boolean) => {
             ThreeProjectorTool.enableOcclusionCulling = v;
         });
     projFolder
         .add(cfg, "showFarPlane")
-        .name("远裁剪面投影(farPlane)")
+        .name("Far plane projection")
         .onChange((v: boolean) => {
             ThreeProjectorTool.showFarPlane = v;
         });
     projFolder
         .add(cfg, "isAutoOpacity")
-        .name("自动调节透明度(isAutoOpacity)")
+        .name("Auto opacity")
         .onChange((v: boolean) => {
             isAutoOpacity = v;
             if (!isAutoOpacity) ThreeProjectorTool.opacity = 1;
         });
 
-    const posFolder = gui.addFolder("相机坐标(position)");
+    const posFolder = gui.addFolder("Camera position");
     posFolder
         .add(cfg, "projPosX", -500, 500, 0.01)
         .name("X")
@@ -292,22 +345,22 @@ onMounted(async () => {
         ];
     }
 
-    const cropFolder = gui.addFolder("裁剪区域(cropRect)");
+    const cropFolder = gui.addFolder("Crop rect");
     cropFolder
         .add(cfg, "cropX0", 0, 1, 0.01)
-        .name("左边界(x0)")
+        .name("Left (x0)")
         .onChange(updateCropFromGUI);
     cropFolder
         .add(cfg, "cropY0", 0, 1, 0.01)
-        .name("下边界(y0)")
+        .name("Bottom (y0)")
         .onChange(updateCropFromGUI);
     cropFolder
         .add(cfg, "cropX1", 0, 1, 0.01)
-        .name("右边界(x1)")
+        .name("Right (x1)")
         .onChange(updateCropFromGUI);
     cropFolder
         .add(cfg, "cropY1", 0, 1, 0.01)
-        .name("上边界(y1)")
+        .name("Top (y1)")
         .onChange(updateCropFromGUI);
 
     // 四角点变换
@@ -320,38 +373,38 @@ onMounted(async () => {
         ];
     }
 
-    const quadFolder = gui.addFolder("四角点变换(quadCorners)");
+    const quadFolder = gui.addFolder("Quad corners");
     quadFolder
         .add(cfg, "quadBLx", -0.5, 1.5, 0.001)
-        .name("左下X(BL.x)")
+        .name("BL.x")
         .onChange(updateQuadFromGUI);
     quadFolder
         .add(cfg, "quadBLy", -0.5, 1.5, 0.001)
-        .name("左下Y(BL.y)")
+        .name("BL.y")
         .onChange(updateQuadFromGUI);
     quadFolder
         .add(cfg, "quadBRx", -0.5, 1.5, 0.001)
-        .name("右下X(BR.x)")
+        .name("BR.x")
         .onChange(updateQuadFromGUI);
     quadFolder
         .add(cfg, "quadBRy", -0.5, 1.5, 0.001)
-        .name("右下Y(BR.y)")
+        .name("BR.y")
         .onChange(updateQuadFromGUI);
     quadFolder
         .add(cfg, "quadTRx", -0.5, 1.5, 0.001)
-        .name("右上X(TR.x)")
+        .name("TR.x")
         .onChange(updateQuadFromGUI);
     quadFolder
         .add(cfg, "quadTRy", -0.5, 1.5, 0.001)
-        .name("右上Y(TR.y)")
+        .name("TR.y")
         .onChange(updateQuadFromGUI);
     quadFolder
         .add(cfg, "quadTLx", -0.5, 1.5, 0.001)
-        .name("左上X(TL.x)")
+        .name("TL.x")
         .onChange(updateQuadFromGUI);
     quadFolder
         .add(cfg, "quadTLy", -0.5, 1.5, 0.001)
-        .name("左上Y(TL.y)")
+        .name("TL.y")
         .onChange(updateQuadFromGUI);
 
     projFolder.open();
@@ -396,6 +449,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
     try {
+        calibrationOpen.value = false;
         renderer.setAnimationLoop(null);
         window.removeEventListener("resize", () => {});
         if (ThreeProjectorTool) ThreeProjectorTool.dispose();
