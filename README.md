@@ -6,7 +6,7 @@
 
 [![NPM Package][npm]][npm-url]
 
-`vid3d-projection` 是一个面向 `Three.js` 和 `Cesium.js` 的三维视频投影工具库，支持把视频内容投射融合到 3D 模型或地理场景中。
+`vid3d-projection` 是一个面向 `Three.js` 和 `Cesium.js` 的三维视频投影工具库，支持把视频内容投射融合到 3D 模型或地理场景中，并提供基于 2D–3D 对应点的投影相机标定求解。
 
 ---
 
@@ -55,15 +55,6 @@ npm install vid3d-projection
 ```ts
 import { createThreeVideoProjector } from "vid3d-projection/three";
 import { createCesiumVideoProjector } from "vid3d-projection/cesium";
-```
-
-也可以从根入口导入：
-
-```ts
-import {
-  createThreeVideoProjector,
-  createCesiumVideoProjector,
-} from "vid3d-projection";
 ```
 
 ---
@@ -169,6 +160,79 @@ projector.destroy();
 
 - `createCesiumVideoProjector(viewer, opts)` 会把投影器作为 primitive 加入 `viewer.scene.primitives`。
 - 不需要手动调用 `projector.update()`，Cesium 渲染流程会自动调用。
+
+### 相机标定
+
+通过视频像素点与三维点的对应关系，在**当前投影参数**基础上最小化重投影误差，优化位置、方位/俯仰/横滚和 FOV。初值需大致合理（可先手调 GUI），对应点分布越好，收敛越稳。库只提供求解函数；选点 UI 见监控示例。
+
+标定期间请保持 `cropRect` / `quadCorners` 为默认恒等，否则求解投影模型与最终采样可能不一致。至少需要 6 组对应点，建议 10～20 组并覆盖画面边缘与不同景深。
+
+#### Three.js
+
+```ts
+import { solveCameraCalibration } from "vid3d-projection/three/calibration";
+
+const result = solveCameraCalibration(
+  [
+    { id: 1, uv: [0.22, 0.71], world: [10.2, 1.5, -8.4] },
+    // ...至少 6 组
+  ],
+  {
+    position: [projector.projCam.position.x, projector.projCam.position.y, projector.projCam.position.z],
+    azimuthDeg: projector.azimuthDeg,
+    elevationDeg: projector.elevationDeg,
+    rollDeg: projector.rollDeg,
+    fovDeg: projector.projCam.fov,
+    aspect: projector.projCam.aspect,
+    near: projector.projCam.near,
+    far: projector.projCam.far,
+  },
+  video.videoWidth,
+  video.videoHeight,
+);
+
+projector.projCam.position.fromArray(result.parameters.position);
+projector.projCam.fov = result.parameters.fovDeg;
+projector.projCam.updateProjectionMatrix();
+projector.azimuthDeg = result.parameters.azimuthDeg;
+projector.elevationDeg = result.parameters.elevationDeg;
+projector.rollDeg = result.parameters.rollDeg;
+```
+
+`world` 使用 Three.js 场景坐标；`uv` 为归一化视频坐标 `[0, 1]`（原点在左下）。
+
+#### Cesium.js
+
+```ts
+import { solveCameraCalibration } from "vid3d-projection/cesium/calibration";
+
+const result = solveCameraCalibration(
+  [
+    { id: 1, uv: [0.22, 0.71], world: [ecefX, ecefY, ecefZ] },
+    // ...至少 6 组
+  ],
+  {
+    position: projector.cameraPosition, // [lon, lat, height]
+    azimuthDeg: projector.azimuthDeg,
+    elevationDeg: projector.elevationDeg,
+    rollDeg: projector.rollDeg,
+    fovDeg: projector.fov,
+    aspect: projector.aspect,
+    near: projector.near,
+    far: projector.far,
+  },
+  video.videoWidth,
+  video.videoHeight,
+);
+
+projector.cameraPosition = result.parameters.position;
+projector.azimuthDeg = result.parameters.azimuthDeg;
+projector.elevationDeg = result.parameters.elevationDeg;
+projector.rollDeg = result.parameters.rollDeg;
+projector.fov = result.parameters.fovDeg;
+```
+
+`world` 使用 ECEF 直角坐标；`position` 为 `[经度, 纬度, 高度]`。
 
 ---
 
@@ -284,6 +348,53 @@ projector.destroy();
 | `cropRect` | `[number, number, number, number]` | 是 | UV 裁剪区域。 |
 | `quadCorners` | `[[number, number], [number, number], [number, number], [number, number]]` | 是（Setter） | 四角透视校正写入入口。 |
 | `source` | `TextureSource` | 是（Setter） | 投影源切换入口（video/image/canvas/imageData）。 |
+
+### 标定 API
+
+#### `solveCameraCalibration(observations, initial, imageWidth, imageHeight, maxIterations?): CameraCalibrationResult`
+
+Three / Cesium 子路径各自导出同名函数，参数空间与投影器一致。
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+| --- | --- | --- | --- | --- |
+| `observations` | `CameraCalibrationObservation[]` | 是 | - | 2D–3D 对应点，至少 6 组。 |
+| `initial` | `CameraCalibrationParameters` | 是 | - | 当前投影参数，作为非线性求解初值。 |
+| `imageWidth` | `number` | 是 | - | 原始视频宽度（像素）。 |
+| `imageHeight` | `number` | 是 | - | 原始视频高度（像素）。 |
+| `maxIterations` | `number` | 否 | `80` | LM 最大迭代次数。 |
+
+`CameraCalibrationObservation`：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `id` | `number` | 标定点编号，供 UI 关联；求解器不使用。 |
+| `uv` | `[number, number]` | 归一化视频坐标 `[u, v]`。 |
+| `world` | `[number, number, number]` | Three：场景坐标；Cesium：ECEF 坐标。 |
+
+`CameraCalibrationParameters`：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `position` | `[number, number, number]` | Three：`[x, y, z]`；Cesium：`[lon, lat, height]`。 |
+| `azimuthDeg` | `number` | 方位角（度）。 |
+| `elevationDeg` | `number` | 俯仰角（度）。 |
+| `rollDeg` | `number` | 横滚角（度）。 |
+| `fovDeg` | `number` | 垂直 FOV（度）；优化变量之一。 |
+| `aspect` | `number` | 宽高比；固定，不参与优化。 |
+| `near` | `number` | 近裁剪面；固定，不参与优化。 |
+| `far` | `number` | 远裁剪面；固定，不参与优化。Cesium 中同时作为方位/俯仰视点距离。 |
+
+`CameraCalibrationResult`：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `parameters` | `CameraCalibrationParameters` | 求解后的完整相机参数。 |
+| `rmsePx` | `number` | 重投影误差 RMSE（像素）。 |
+| `maxErrorPx` | `number` | 最大单点重投影误差（像素）。 |
+| `errorsPx` | `number[]` | 各点重投影误差，顺序与 `observations` 一致。 |
+| `iterations` | `number` | 实际 LM 迭代次数。 |
+
+优化变量为位置（Three：XYZ；Cesium：相对初值的 ENU 米制增量）、方位/俯仰/横滚和 FOV。
 
 ---
 

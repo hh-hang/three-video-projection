@@ -6,7 +6,7 @@
 
 [![NPM Package][npm]][npm-url]
 
-`vid3d-projection` is a 3D video projection utility for `Three.js` and `Cesium.js`, designed for projecting and blending video content into 3D meshes or geographic scenes.
+`vid3d-projection` is a 3D video projection utility for `Three.js` and `Cesium.js`, designed for projecting and blending video content into 3D meshes or geographic scenes, with optional 2D–3D camera calibration for projector pose estimation.
 
 ---
 
@@ -56,15 +56,6 @@ Recommended subpath imports:
 ```ts
 import { createThreeVideoProjector } from "vid3d-projection/three";
 import { createCesiumVideoProjector } from "vid3d-projection/cesium";
-```
-
-You can also import from the root entry:
-
-```ts
-import {
-  createThreeVideoProjector,
-  createCesiumVideoProjector,
-} from "vid3d-projection";
 ```
 
 ---
@@ -170,6 +161,79 @@ Notes:
 
 - `createCesiumVideoProjector(viewer, opts)` adds the projector as a primitive into `viewer.scene.primitives`.
 - You do not need to call `projector.update()` manually; Cesium calls it in its render pipeline.
+
+### Camera Calibration
+
+Refine projector pose (position, azimuth/elevation/roll, FOV) by minimizing reprojection error **from the current projection parameters**. The initial guess should be roughly correct (e.g. after manual GUI tuning); better point distribution yields more stable convergence. The library provides the solver only; picking UI lives in the monitor examples.
+
+Keep `cropRect` / `quadCorners` at their default identity during calibration, otherwise the solver model may disagree with final sampling. At least 6 correspondences are required; 10–20 well-distributed points are recommended.
+
+#### Three.js
+
+```ts
+import { solveCameraCalibration } from "vid3d-projection/three/calibration";
+
+const result = solveCameraCalibration(
+  [
+    { id: 1, uv: [0.22, 0.71], world: [10.2, 1.5, -8.4] },
+    // ...at least 6 points
+  ],
+  {
+    position: [projector.projCam.position.x, projector.projCam.position.y, projector.projCam.position.z],
+    azimuthDeg: projector.azimuthDeg,
+    elevationDeg: projector.elevationDeg,
+    rollDeg: projector.rollDeg,
+    fovDeg: projector.projCam.fov,
+    aspect: projector.projCam.aspect,
+    near: projector.projCam.near,
+    far: projector.projCam.far,
+  },
+  video.videoWidth,
+  video.videoHeight,
+);
+
+projector.projCam.position.fromArray(result.parameters.position);
+projector.projCam.fov = result.parameters.fovDeg;
+projector.projCam.updateProjectionMatrix();
+projector.azimuthDeg = result.parameters.azimuthDeg;
+projector.elevationDeg = result.parameters.elevationDeg;
+projector.rollDeg = result.parameters.rollDeg;
+```
+
+`world` uses Three.js scene coordinates; `uv` is normalized video UV in `[0, 1]` (origin at bottom-left).
+
+#### Cesium.js
+
+```ts
+import { solveCameraCalibration } from "vid3d-projection/cesium/calibration";
+
+const result = solveCameraCalibration(
+  [
+    { id: 1, uv: [0.22, 0.71], world: [ecefX, ecefY, ecefZ] },
+    // ...at least 6 points
+  ],
+  {
+    position: projector.cameraPosition, // [lon, lat, height]
+    azimuthDeg: projector.azimuthDeg,
+    elevationDeg: projector.elevationDeg,
+    rollDeg: projector.rollDeg,
+    fovDeg: projector.fov,
+    aspect: projector.aspect,
+    near: projector.near,
+    far: projector.far,
+  },
+  video.videoWidth,
+  video.videoHeight,
+);
+
+projector.cameraPosition = result.parameters.position;
+projector.azimuthDeg = result.parameters.azimuthDeg;
+projector.elevationDeg = result.parameters.elevationDeg;
+projector.rollDeg = result.parameters.rollDeg;
+projector.fov = result.parameters.fovDeg;
+```
+
+`world` uses ECEF Cartesian coordinates; `position` is `[longitude, latitude, height]`.
 
 ---
 
@@ -285,6 +349,53 @@ Notes:
 | `cropRect` | `[number, number, number, number]` | Yes | UV crop rectangle. |
 | `quadCorners` | `[[number, number], [number, number], [number, number], [number, number]]` | Yes (Setter) | Setter entry for keystone correction corners. |
 | `source` | `TextureSource` | Yes (Setter) | Projection source switch entry (video/image/canvas/imagedata). |
+
+### Calibration API
+
+#### `solveCameraCalibration(observations, initial, imageWidth, imageHeight, maxIterations?): CameraCalibrationResult`
+
+The Three and Cesium subpaths each export a function with the same name; the parameter space matches the corresponding projector.
+
+| Parameter | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `observations` | `CameraCalibrationObservation[]` | Yes | - | 2D–3D correspondences; at least 6. |
+| `initial` | `CameraCalibrationParameters` | Yes | - | Current projector parameters used as the nonlinear solve seed. |
+| `imageWidth` | `number` | Yes | - | Source video width in pixels. |
+| `imageHeight` | `number` | Yes | - | Source video height in pixels. |
+| `maxIterations` | `number` | No | `80` | Maximum LM iterations. |
+
+`CameraCalibrationObservation`:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | `number` | Point id for UI association; unused by the solver. |
+| `uv` | `[number, number]` | Normalized video coordinates `[u, v]`. |
+| `world` | `[number, number, number]` | Three: scene XYZ; Cesium: ECEF XYZ. |
+
+`CameraCalibrationParameters`:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `position` | `[number, number, number]` | Three: `[x, y, z]`; Cesium: `[lon, lat, height]`. |
+| `azimuthDeg` | `number` | Azimuth (degrees). |
+| `elevationDeg` | `number` | Elevation (degrees). |
+| `rollDeg` | `number` | Roll (degrees). |
+| `fovDeg` | `number` | Vertical FOV (degrees); optimized. |
+| `aspect` | `number` | Aspect ratio; fixed, not optimized. |
+| `near` | `number` | Near plane; fixed, not optimized. |
+| `far` | `number` | Far plane; fixed, not optimized. In Cesium also used as look-at distance for azimuth/elevation. |
+
+`CameraCalibrationResult`:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `parameters` | `CameraCalibrationParameters` | Solved projector parameters. |
+| `rmsePx` | `number` | Reprojection RMSE in pixels. |
+| `maxErrorPx` | `number` | Maximum per-point reprojection error in pixels. |
+| `errorsPx` | `number[]` | Per-point errors, same order as `observations`. |
+| `iterations` | `number` | Completed LM iterations. |
+
+Optimized variables: position (Three: XYZ; Cesium: ENU meter deltas from the initial pose), azimuth/elevation/roll, and FOV.
 
 ---
 
