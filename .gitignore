@@ -1,6 +1,7 @@
 node_modules
 dist
 docs
+example/public/cesium
 .vite
 .env
 .env.local
