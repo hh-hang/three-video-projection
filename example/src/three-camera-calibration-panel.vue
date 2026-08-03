@@ -12,8 +12,19 @@
             <b>#{{ marker.id }} 3D point</b>
         </div>
 
-        <section class="calibration-panel">
-            <header class="panel-header">
+        <section
+            ref="panelRef"
+            class="calibration-panel"
+            :class="{ dragging: isPanelDragging }"
+            :style="panelStyle"
+        >
+            <header
+                class="panel-header"
+                @pointerdown="startPanelDrag"
+                @pointermove="movePanelDrag"
+                @pointerup="endPanelDrag"
+                @pointercancel="endPanelDrag"
+            >
                 <div>
                     <strong>Video spatial calibration</strong>
                     <span>Three.js 2D–3D correspondence solve</span>
@@ -206,6 +217,7 @@ interface SceneMarker {
 }
 
 // DOM 引用
+const panelRef = ref<HTMLElement | null>(null);
 const frameCanvasRef = ref<HTMLCanvasElement | null>(null);
 const frameWrapRef = ref<HTMLElement | null>(null);
 const frameContentRef = ref<HTMLElement | null>(null);
@@ -220,6 +232,11 @@ const solving = ref(false);
 const errorMessage = ref("");
 /** 冻结帧的原始像素宽高，求解时换算重投影误差用 */
 const imageSize = ref<[number, number]>([0, 0]);
+
+// 面板拖拽位置；null 表示沿用 CSS 默认定位
+const panelLeft = ref<number | null>(null);
+const panelTop = ref<number | null>(null);
+const isPanelDragging = ref(false);
 
 // 视频帧缩放与平移
 const frameScale = ref(1);
@@ -253,10 +270,20 @@ let framePanMoved = false;
 /** 拖拽结束后抑制一次 click，避免误选视频点 */
 let suppressFrameClick = false;
 
+// 面板拖拽的指针状态
+let panelDragPointerId: number | null = null;
+let panelDragStartX = 0;
+let panelDragStartY = 0;
+let panelDragOriginLeft = 0;
+let panelDragOriginTop = 0;
+
 // 场景拖拽后抑制 click，避免松手误选
 let scenePickStartX = 0;
 let scenePickStartY = 0;
 let suppressSceneClick = false;
+
+const clamp = (value: number, min: number, max: number) =>
+    Math.min(max, Math.max(min, value));
 
 // 计算属性
 const instructionText = computed(() =>
@@ -284,6 +311,16 @@ const frameContentStyle = computed(() => ({
     "--frame-point-border-size": `${2 / frameScale.value}px`,
     transform: `translate3d(${frameOffsetX.value}px, ${frameOffsetY.value}px, 0) scale(${frameScale.value})`,
 }));
+
+/** 拖拽后用 left/top 覆盖定位 */
+const panelStyle = computed(() => {
+    if (panelLeft.value === null || panelTop.value === null) return undefined;
+    return {
+        left: `${panelLeft.value}px`,
+        top: `${panelTop.value}px`,
+        right: "auto",
+    };
+});
 
 const angleSummary = computed(() => {
     if (!result.value) return "";
@@ -716,6 +753,64 @@ const resumeVideo = () => {
     if (!wasPaused) props.videoEl.play().catch(() => undefined);
 };
 
+/** 将面板位置限制在视口内，避免拖出屏幕 */
+const constrainPanelPosition = (left: number, top: number): [number, number] => {
+    const panel = panelRef.value;
+    const margin = 8;
+    const width = panel?.offsetWidth ?? 390;
+    const height = panel?.offsetHeight ?? 200;
+    const maxLeft = Math.max(margin, window.innerWidth - width - margin);
+    const maxTop = Math.max(margin, window.innerHeight - height - margin);
+    return [clamp(left, margin, maxLeft), clamp(top, margin, maxTop)];
+};
+
+/** 从标题栏拖拽移动面板 */
+const startPanelDrag = (event: PointerEvent) => {
+    if (event.button !== 0) return;
+    if ((event.target as HTMLElement).closest("button")) return;
+    const panel = panelRef.value;
+    if (!panel) return;
+
+    const rect = panel.getBoundingClientRect();
+    panelDragPointerId = event.pointerId;
+    panelDragStartX = event.clientX;
+    panelDragStartY = event.clientY;
+    panelDragOriginLeft = rect.left;
+    panelDragOriginTop = rect.top;
+    panelLeft.value = rect.left;
+    panelTop.value = rect.top;
+    isPanelDragging.value = true;
+    (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+};
+
+const movePanelDrag = (event: PointerEvent) => {
+    if (event.pointerId !== panelDragPointerId) return;
+    const [left, top] = constrainPanelPosition(
+        panelDragOriginLeft + (event.clientX - panelDragStartX),
+        panelDragOriginTop + (event.clientY - panelDragStartY),
+    );
+    panelLeft.value = left;
+    panelTop.value = top;
+};
+
+const endPanelDrag = (event: PointerEvent) => {
+    if (event.pointerId !== panelDragPointerId) return;
+    const header = event.currentTarget as HTMLElement;
+    if (header.hasPointerCapture(event.pointerId)) {
+        header.releasePointerCapture(event.pointerId);
+    }
+    panelDragPointerId = null;
+    isPanelDragging.value = false;
+};
+
+/** 窗口尺寸变化时，把已拖拽的面板重新钳制进视口 */
+const handleWindowResize = () => {
+    if (panelLeft.value === null || panelTop.value === null) return;
+    const [left, top] = constrainPanelPosition(panelLeft.value, panelTop.value);
+    panelLeft.value = left;
+    panelTop.value = top;
+};
+
 const cleanup = () => {
     if (disposed) return;
     disposed = true;
@@ -725,6 +820,7 @@ const cleanup = () => {
     canvas.removeEventListener("pointermove", onScenePointerMove, true);
     canvas.removeEventListener("click", pickWorldPoint, true);
     document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    window.removeEventListener("resize", handleWindowResize);
     sceneMarkers.value = [];
     resumeVideo();
 };
@@ -739,6 +835,7 @@ const closePanel = () => {
 onMounted(() => {
     initialParameters = getCurrentParameters();
     document.addEventListener("fullscreenchange", handleFullscreenChange);
+    window.addEventListener("resize", handleWindowResize);
     if (!captureFrame()) return;
     const canvas = props.renderer.domElement;
     // 捕获阶段监听，便于在其他控件之前完成三维点拾取，并过滤 OrbitControls 拖拽松手
@@ -840,6 +937,9 @@ onBeforeUnmount(cleanup);
     padding: 12px 14px;
     border-bottom: 1px solid rgba(71, 136, 251, 0.18);
     background: rgba(30, 64, 175, 0.13);
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
 
     div {
         display: flex;
@@ -856,6 +956,10 @@ onBeforeUnmount(cleanup);
         color: #64748b;
         font-size: 10px;
     }
+}
+
+.calibration-panel.dragging .panel-header {
+    cursor: grabbing;
 }
 
 .panel-body {
@@ -1063,6 +1167,7 @@ onBeforeUnmount(cleanup);
     color: #94a3b8;
     background: transparent;
     font-size: 24px;
+    cursor: pointer;
 }
 
 .error-message {
