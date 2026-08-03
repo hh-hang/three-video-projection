@@ -1,4 +1,4 @@
-import { cpSync } from "node:fs";
+import { cpSync, existsSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 import vue from "@vitejs/plugin-vue";
@@ -23,11 +23,20 @@ function copyDir(src: string, dest: string) {
     cpSync(src, dest, { recursive: true });
 }
 
+function ensureCesiumPublic() {
+    if (!existsSync(path.join(cesiumSource, "Workers"))) {
+        throw new Error(
+            `Cesium static assets not found at ${cesiumSource}. Run npm install first.`,
+        );
+    }
+    copyDir(cesiumSource, cesiumPublic);
+}
+
 function copyCesium(): Plugin {
     return {
         name: "copy-cesium",
-        buildStart() {
-            copyDir(cesiumSource, cesiumPublic);
+        config() {
+            ensureCesiumPublic();
         },
     };
 }
@@ -39,6 +48,11 @@ export default defineConfig({
         CESIUM_BASE_URL: JSON.stringify("/vid3d-projection/cesium/"),
     },
     plugins: [copyCesium(), vue(), glsl()],
+    server: {
+        watch: {
+            ignored: ["**/public/cesium/**"],
+        },
+    },
     resolve: {
         alias: {
             "vid3d-projection": path.resolve(__dirname, "src/index.ts"),
